@@ -7,9 +7,21 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   access: {
+    // The collection itself is publicly readable so blog posts can show an author byline
+    // (name), but individual fields below are locked down so PII (email) and role aren't
+    // exposed to unauthenticated API requests.
     read: () => true,
   },
   fields: [
+    {
+      name: "email",
+      type: "email",
+      required: true,
+      unique: true,
+      access: {
+        read: ({ req: { user } }) => Boolean(user),
+      },
+    },
     {
       name: "name",
       type: "text",
@@ -19,6 +31,9 @@ export const Users: CollectionConfig = {
       type: "select",
       required: true,
       defaultValue: "editor",
+      access: {
+        read: ({ req: { user } }) => Boolean(user),
+      },
       options: [
         { label: "Admin", value: "admin" },
         { label: "Editor", value: "editor" },

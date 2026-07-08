@@ -24,7 +24,10 @@ export async function GET(req: Request): Promise<Response> {
     return new Response("Insufficient search params", { status: 404 })
   }
 
-  if (!path.startsWith("/")) {
+  // Must be a same-site relative path. Reject anything that could be interpreted as a
+  // protocol-relative or absolute URL (e.g. "//evil.com", "/\evil.com", "/\/evil.com"),
+  // which browsers can treat as a redirect to an external host.
+  if (!path.startsWith("/") || path.startsWith("//") || path.startsWith("/\\") || path.includes("://")) {
     return new Response("This endpoint can only be used for relative previews", { status: 500 })
   }
 
