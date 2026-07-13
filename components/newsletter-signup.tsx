@@ -30,12 +30,27 @@ export function NewsletterSignup({ variant = "default", className = "" }: Newsle
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
 
-    setIsSubmitting(false)
-    setIsSubscribed(true)
-    setEmail("")
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        setError(data?.error || "Something went wrong. Please try again.")
+        setIsSubmitting(false)
+        return
+      }
+
+      setIsSubmitting(false)
+      setIsSubscribed(true)
+      setEmail("")
+    } catch {
+      setError("Something went wrong. Please try again.")
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubscribed) {
